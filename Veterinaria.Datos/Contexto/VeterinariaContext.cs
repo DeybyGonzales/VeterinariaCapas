@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +16,8 @@ public partial class VeterinariaContext : DbContext
     public virtual DbSet<Mascota> Mascotas { get; set; }
 
     public virtual DbSet<Propietario> Propietarios { get; set; }
+
+    public virtual DbSet<Usuario> Usuarios { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -49,6 +51,18 @@ public partial class VeterinariaContext : DbContext
             entity.Property(e => e.Email).HasMaxLength(100);
             entity.Property(e => e.Nombres).HasMaxLength(100);
             entity.Property(e => e.Telefono).HasMaxLength(15);
+        });
+
+        modelBuilder.Entity<Usuario>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.Correo, "UQ_Usuarios_Correo").IsUnique();
+
+            entity.Property(e => e.Correo).HasMaxLength(100);
+            entity.Property(e => e.ClaveHash).HasMaxLength(100).IsUnicode(false);
+            entity.Property(e => e.Rol).HasMaxLength(20);
+            entity.Property(e => e.FechaRegistro).HasDefaultValueSql("(sysutcdatetime())");
         });
 
         OnModelCreatingPartial(modelBuilder);

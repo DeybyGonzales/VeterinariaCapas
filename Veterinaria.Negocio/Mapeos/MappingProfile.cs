@@ -34,5 +34,9 @@ public class MappingProfile : Profile
         CreateMap<MascotaActualizarDto, Mascota>()
             .ForMember(d => d.Id, o => o.Ignore())
             .ForMember(d => d.Propietario, o => o.Ignore());
+
+        // ---------- Usuario ----------
+        // Entidad -> DTO de respuesta (sin ClaveHash)
+        CreateMap<Usuario, UsuarioDto>();
     }
 }

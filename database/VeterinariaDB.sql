@@ -4,6 +4,7 @@
 --   Nube:   en Azure SQL la base se crea desde el portal; abre el editor de consultas
 --           sobre esa base y ejecuta este script tal cual (no usa CREATE DATABASE ni USE).
 
+IF OBJECT_ID('Usuarios', 'U') IS NOT NULL DROP TABLE Usuarios;
 IF OBJECT_ID('Mascotas', 'U') IS NOT NULL DROP TABLE Mascotas;
 IF OBJECT_ID('Propietarios', 'U') IS NOT NULL DROP TABLE Propietarios;
 GO
@@ -28,6 +29,18 @@ CREATE TABLE Mascotas (
     CONSTRAINT FK_Mascotas_Propietarios FOREIGN KEY (PropietarioId) REFERENCES Propietarios (Id),
     CONSTRAINT UQ_Mascotas_Propietario_Nombre UNIQUE (PropietarioId, Nombre)
 );
+
+-- S14: usuarios de la API. ClaveHash = hash BCrypt (nunca la clave en texto).
+-- Rol: Cliente (por defecto al registrarse), Recepcionista o Veterinario (los asigna la clínica).
+CREATE TABLE Usuarios (
+    Id            INT IDENTITY(1,1) PRIMARY KEY,
+    Correo        NVARCHAR(100) NOT NULL,
+    ClaveHash     VARCHAR(100)  NOT NULL,
+    Rol           NVARCHAR(20)  NOT NULL CONSTRAINT DF_Usuarios_Rol DEFAULT 'Cliente',
+    FechaRegistro DATETIME2     NOT NULL CONSTRAINT DF_Usuarios_FechaRegistro DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT UQ_Usuarios_Correo UNIQUE (Correo),
+    CONSTRAINT CK_Usuarios_Rol CHECK (Rol IN ('Cliente', 'Recepcionista', 'Veterinario'))
+);
 GO
 
 INSERT INTO Propietarios (Nombres, Dni, Telefono, Email) VALUES
@@ -42,5 +55,18 @@ INSERT INTO Mascotas (Nombre, Especie, Raza, Edad, Peso, PropietarioId) VALUES
     ('Luna',     'Gato',  NULL,              1,  3.10, 3);
 GO
 
+-- Un usuario por rol. Clave de prueba de los tres: Clave123!
+-- Los hashes se obtuvieron registrando cada cuenta con POST api/auth/registro (todas nacen como 'Cliente')
+-- y luego asignando el rol con UPDATE, como haría la clínica.
+INSERT INTO Usuarios (Correo, ClaveHash) VALUES
+    ('cliente@vetsalud.pe',     '$2a$11$A6FQZyJVFV/06GgcG3S6MebltcWVPdw9yZXWM25GvatI4nZaE7Og2'),
+    ('recepcion@vetsalud.pe',   '$2a$11$DpjFHMqSnInGWeTl2HAUAOO92XFzK9wIMA0GN5Yej5csgSVbnqcKi'),
+    ('veterinario@vetsalud.pe', '$2a$11$F7qgn2pw2mAIqrHRduUvzef/ew/IlguC5qo7Rg1gS3TW1mLLd052e');
+
+UPDATE Usuarios SET Rol = 'Recepcionista' WHERE Correo = 'recepcion@vetsalud.pe';
+UPDATE Usuarios SET Rol = 'Veterinario'   WHERE Correo = 'veterinario@vetsalud.pe';
+GO
+
 SELECT * FROM Propietarios;
 SELECT * FROM Mascotas;
+SELECT Id, Correo, Rol, FechaRegistro FROM Usuarios;

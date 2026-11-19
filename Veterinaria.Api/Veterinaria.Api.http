@@ -1,81 +1,139 @@
 @base = http://localhost:5150/api
+@json = application/json
+
+# Usuarios de prueba (script SQL). Clave de los tres: Clave123!
+#   cliente@vetsalud.pe (Cliente) · recepcion@vetsalud.pe (Recepcionista) · veterinario@vetsalud.pe (Veterinario)
+# Ejecuta primero los 3 logins: los demás pedidos reutilizan sus tokens.
+
+### ===== AUTH =====
+# @name loginCliente
+POST {{base}}/auth/login
+Content-Type: {{json}}
+
+{ "correo": "cliente@vetsalud.pe", "clave": "Clave123!" }
+
+###
+# @name loginRecepcion
+POST {{base}}/auth/login
+Content-Type: {{json}}
+
+{ "correo": "recepcion@vetsalud.pe", "clave": "Clave123!" }
+
+###
+# @name loginVeterinario
+POST {{base}}/auth/login
+Content-Type: {{json}}
+
+{ "correo": "veterinario@vetsalud.pe", "clave": "Clave123!" }
+
+###
+@tCliente = {{loginCliente.response.body.$.token}}
+@tRecepcion = {{loginRecepcion.response.body.$.token}}
+@tVeterinario = {{loginVeterinario.response.body.$.token}}
+
+### 401 - clave incorrecta (mismo mensaje que si el correo no existe)
+POST {{base}}/auth/login
+Content-Type: {{json}}
+
+{ "correo": "recepcion@vetsalud.pe", "clave": "incorrecta" }
+
+### 201 - registro (el servidor asigna el rol Cliente aunque se envíe "rol")
+POST {{base}}/auth/registro
+Content-Type: {{json}}
+
+{ "correo": "nuevo@gmail.com", "clave": "Secreta2026", "rol": "Veterinario" }
+
+### 409 - correo repetido
+POST {{base}}/auth/registro
+Content-Type: {{json}}
+
+{ "correo": "cliente@vetsalud.pe", "clave": "Secreta2026" }
+
+### 400 - datos inválidos
+POST {{base}}/auth/registro
+Content-Type: {{json}}
+
+{ "correo": "no-es-correo", "clave": "123" }
+
+### 200 - perfil (claims del token)
+GET {{base}}/auth/perfil
+Authorization: Bearer {{tCliente}}
+
+### 401 - perfil sin token
+GET {{base}}/auth/perfil
+
+### ===== MASCOTAS =====
+### 200 - público
+GET {{base}}/mascotas?especie=Perro
+
+### 200 - público
+GET {{base}}/mascotas/1
+
+### 201 - Recepcionista registra una mascota
+POST {{base}}/mascotas
+Authorization: Bearer {{tRecepcion}}
+Content-Type: {{json}}
+
+{ "nombre": "Toby", "especie": "Perro", "raza": "Beagle", "edad": 1, "peso": 9.5, "propietarioId": 2 }
+
+### 403 - Recepcionista no puede actualizar datos clínicos
+PUT {{base}}/mascotas/1
+Authorization: Bearer {{tRecepcion}}
+Content-Type: {{json}}
+
+{ "nombre": "Firulais", "especie": "Perro", "raza": "Labrador", "edad": 6, "peso": 29.1, "propietarioId": 1 }
+
+### 204 - Veterinario actualiza peso y edad
+PUT {{base}}/mascotas/1
+Authorization: Bearer {{tVeterinario}}
+Content-Type: {{json}}
+
+{ "nombre": "Firulais", "especie": "Perro", "raza": "Labrador", "edad": 6, "peso": 29.1, "propietarioId": 1 }
+
+### 403 - Veterinario no puede eliminar mascotas
+DELETE {{base}}/mascotas/4
+Authorization: Bearer {{tVeterinario}}
 
 ### ===== PROPIETARIOS =====
-### 200 - listar con filtro
-GET {{base}}/propietarios?buscar=lopez
+### 401 - sin token
+GET {{base}}/propietarios
 
-### 200 - por id
-GET {{base}}/propietarios/1
+### 200 - cualquier usuario autenticado
+GET {{base}}/propietarios?buscar=lopez
+Authorization: Bearer {{tCliente}}
 
 ### 404 - no existe
 GET {{base}}/propietarios/99
+Authorization: Bearer {{tCliente}}
 
-### 200 - ruta anidada: mascotas de un propietario
-GET {{base}}/propietarios/1/mascotas
-
-### 201 - crear
+### 403 - Cliente no puede crear propietarios
 POST {{base}}/propietarios
-Content-Type: application/json
+Authorization: Bearer {{tCliente}}
+Content-Type: {{json}}
 
-{ "nombres": "Pedro Salas Vega", "dni": "12345678", "telefono": "999888777", "email": "pedro@gmail.com" }
+{ "nombres": "Ana Díaz Paz", "dni": "11112222", "telefono": "999888777", "email": "ana@gmail.com" }
 
-### 409 - DNI repetido (regla 1)
+### 201 - Recepcionista crea propietario
 POST {{base}}/propietarios
-Content-Type: application/json
+Authorization: Bearer {{tRecepcion}}
+Content-Type: {{json}}
 
-{ "nombres": "Otro Dueño", "dni": "45678912", "telefono": "999888777" }
+{ "nombres": "Ana Díaz Paz", "dni": "11112222", "telefono": "999888777", "email": "ana@gmail.com" }
 
-### 400 - datos inválidos
+### 409 - DNI repetido
 POST {{base}}/propietarios
-Content-Type: application/json
+Authorization: Bearer {{tRecepcion}}
+Content-Type: {{json}}
 
-{ "nombres": "P", "dni": "12ab", "telefono": "1" }
+{ "nombres": "Otra Persona", "dni": "45678912", "telefono": "900000000" }
 
-### 204 - actualizar
-PUT {{base}}/propietarios/4
-Content-Type: application/json
+### 204 - Recepcionista actualiza
+PUT {{base}}/propietarios/3
+Authorization: Bearer {{tRecepcion}}
+Content-Type: {{json}}
 
-{ "nombres": "Pedro Salas Vega", "dni": "12345678", "telefono": "911222333", "email": "pedro.salas@gmail.com" }
+{ "nombres": "Lucía Fernández Rojas", "dni": "40987123", "telefono": "956000111", "email": "lucia.fr@hotmail.com" }
 
-### 409 - eliminar propietario con mascotas (regla 2)
+### 409 - no se elimina un propietario con mascotas
 DELETE {{base}}/propietarios/1
-
-### 204 - eliminar
-DELETE {{base}}/propietarios/4
-
-### ===== MASCOTAS =====
-### 200 - filtros por query string
-GET {{base}}/mascotas?especie=Perro&edadMax=4
-
-### 200 - por id (devuelve el nombre del propietario)
-GET {{base}}/mascotas/1
-
-### 404
-GET {{base}}/mascotas/99
-
-### 201 - crear
-POST {{base}}/mascotas
-Content-Type: application/json
-
-{ "nombre": "Toby", "especie": "Perro", "raza": "Beagle", "edad": 4, "peso": 12.5, "propietarioId": 2 }
-
-### 409 - nombre repetido para el mismo propietario (regla 3)
-POST {{base}}/mascotas
-Content-Type: application/json
-
-{ "nombre": "Firulais", "especie": "Perro", "edad": 4, "peso": 12.5, "propietarioId": 1 }
-
-### 400 - datos inválidos
-POST {{base}}/mascotas
-Content-Type: application/json
-
-{ "nombre": "T", "especie": "Pe", "edad": 80, "peso": 0, "propietarioId": 2 }
-
-### 204 - actualizar
-PUT {{base}}/mascotas/5
-Content-Type: application/json
-
-{ "nombre": "Toby", "especie": "Perro", "raza": "Beagle", "edad": 5, "peso": 13.0, "propietarioId": 2 }
-
-### 204 - eliminar
-DELETE {{base}}/mascotas/5
+Authorization: Bearer {{tRecepcion}}

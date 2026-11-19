@@ -1,10 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Veterinaria.Entidades.DTOs;
 using Veterinaria.Negocio.Excepciones;
+using Veterinaria.Negocio.Seguridad;
 using Veterinaria.Negocio.Servicios;
 
 namespace Veterinaria.Api.Controllers;
 
+[Authorize]   // por defecto: todo el controlador exige token
 [ApiController]
 [Route("api/[controller]")]
 public class PropietariosController : ControllerBase
@@ -37,6 +40,7 @@ public class PropietariosController : ControllerBase
     }
 
     // POST api/propietarios
+    [Authorize(Roles = Roles.Recepcionista)]
     [HttpPost]
     public async Task<ActionResult<PropietarioDto>> Post(PropietarioCrearDto dto)
     {
@@ -52,6 +56,7 @@ public class PropietariosController : ControllerBase
     }
 
     // PUT api/propietarios/1
+    [Authorize(Roles = Roles.Recepcionista)]
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, PropietarioActualizarDto dto)
     {
@@ -67,6 +72,7 @@ public class PropietariosController : ControllerBase
     }
 
     // DELETE api/propietarios/1
+    [Authorize(Roles = Roles.Recepcionista)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

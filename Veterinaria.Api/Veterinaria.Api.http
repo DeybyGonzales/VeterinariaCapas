@@ -1,0 +1,81 @@
+@base = http://localhost:5150/api
+
+### ===== PROPIETARIOS =====
+### 200 - listar con filtro
+GET {{base}}/propietarios?buscar=lopez
+
+### 200 - por id
+GET {{base}}/propietarios/1
+
+### 404 - no existe
+GET {{base}}/propietarios/99
+
+### 200 - ruta anidada: mascotas de un propietario
+GET {{base}}/propietarios/1/mascotas
+
+### 201 - crear
+POST {{base}}/propietarios
+Content-Type: application/json
+
+{ "nombres": "Pedro Salas Vega", "dni": "12345678", "telefono": "999888777", "email": "pedro@gmail.com" }
+
+### 409 - DNI repetido (regla 1)
+POST {{base}}/propietarios
+Content-Type: application/json
+
+{ "nombres": "Otro Dueño", "dni": "45678912", "telefono": "999888777" }
+
+### 400 - datos inválidos
+POST {{base}}/propietarios
+Content-Type: application/json
+
+{ "nombres": "P", "dni": "12ab", "telefono": "1" }
+
+### 204 - actualizar
+PUT {{base}}/propietarios/4
+Content-Type: application/json
+
+{ "nombres": "Pedro Salas Vega", "dni": "12345678", "telefono": "911222333", "email": "pedro.salas@gmail.com" }
+
+### 409 - eliminar propietario con mascotas (regla 2)
+DELETE {{base}}/propietarios/1
+
+### 204 - eliminar
+DELETE {{base}}/propietarios/4
+
+### ===== MASCOTAS =====
+### 200 - filtros por query string
+GET {{base}}/mascotas?especie=Perro&edadMax=4
+
+### 200 - por id (devuelve el nombre del propietario)
+GET {{base}}/mascotas/1
+
+### 404
+GET {{base}}/mascotas/99
+
+### 201 - crear
+POST {{base}}/mascotas
+Content-Type: application/json
+
+{ "nombre": "Toby", "especie": "Perro", "raza": "Beagle", "edad": 4, "peso": 12.5, "propietarioId": 2 }
+
+### 409 - nombre repetido para el mismo propietario (regla 3)
+POST {{base}}/mascotas
+Content-Type: application/json
+
+{ "nombre": "Firulais", "especie": "Perro", "edad": 4, "peso": 12.5, "propietarioId": 1 }
+
+### 400 - datos inválidos
+POST {{base}}/mascotas
+Content-Type: application/json
+
+{ "nombre": "T", "especie": "Pe", "edad": 80, "peso": 0, "propietarioId": 2 }
+
+### 204 - actualizar
+PUT {{base}}/mascotas/5
+Content-Type: application/json
+
+{ "nombre": "Toby", "especie": "Perro", "raza": "Beagle", "edad": 5, "peso": 13.0, "propietarioId": 2 }
+
+### 204 - eliminar
+DELETE {{base}}/mascotas/5

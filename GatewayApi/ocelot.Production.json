@@ -1,0 +1,110 @@
+{
+  "Routes": [
+    {
+      "UpstreamPathTemplate": "/gateway/auth/{everything}",
+      "UpstreamHttpMethod": [
+        "POST"
+      ],
+      "DownstreamPathTemplate": "/api/auth/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "vetcapas-api.runasp.net",
+          "Port": 443
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/mascotas{everything}",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "DownstreamPathTemplate": "/api/mascotas{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "vetcapas-api.runasp.net",
+          "Port": 443
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/mascotas{everything}",
+      "UpstreamHttpMethod": [
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/api/mascotas{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "vetcapas-api.runasp.net",
+          "Port": 443
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKeys": [
+          "Bearer"
+        ]
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/propietarios{everything}",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "DownstreamPathTemplate": "/api/propietarios{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "vetcapas-api.runasp.net",
+          "Port": 443
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/propietarios{everything}",
+      "UpstreamHttpMethod": [
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/api/propietarios{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "vetcapas-api.runasp.net",
+          "Port": 443
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKeys": [
+          "Bearer"
+        ]
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/gateway/vacunas{everything}",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "DownstreamPathTemplate": "/api/vacunas{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "vetcapas-vacunas.runasp.net",
+          "Port": 443
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKeys": [
+          "Bearer"
+        ]
+      }
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "https://vetcapas-gateway.runasp.net"
+  }
+}

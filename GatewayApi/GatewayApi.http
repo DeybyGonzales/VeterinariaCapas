@@ -1,0 +1,98 @@
+# Pruebas de la S15: TODO pasa por el gateway (puerto 5100).
+# Para la nube cambia @gw por la dirección del gateway publicado.
+@gw = http://localhost:5100/gateway
+@json = application/json
+
+# Usuarios de prueba (script SQL). Clave de los tres: Clave123!
+#   cliente@vetsalud.pe (Cliente) · recepcion@vetsalud.pe (Recepcionista) · veterinario@vetsalud.pe (Veterinario)
+
+### ===== AUTH (público) =====
+# @name loginCliente
+POST {{gw}}/auth/login
+Content-Type: {{json}}
+
+{ "correo": "cliente@vetsalud.pe", "clave": "Clave123!" }
+
+###
+# @name loginRecepcion
+POST {{gw}}/auth/login
+Content-Type: {{json}}
+
+{ "correo": "recepcion@vetsalud.pe", "clave": "Clave123!" }
+
+###
+@tCliente = {{loginCliente.response.body.$.token}}
+@tRecepcion = {{loginRecepcion.response.body.$.token}}
+
+### 201 - registro por el gateway
+POST {{gw}}/auth/registro
+Content-Type: {{json}}
+
+{ "correo": "gateway{{$randomInt 1000 9999}}@gmail.com", "clave": "Secreta2026" }
+
+### ===== API S14: GET públicos en el gateway =====
+### 200 - lista de mascotas sin token
+GET {{gw}}/mascotas
+
+### 200 - una mascota
+GET {{gw}}/mascotas/1
+
+### 200 - filtro (la query string también se reenvía)
+GET {{gw}}/mascotas?especie=Gato
+
+### 404 - mascota inexistente
+GET {{gw}}/mascotas/999
+
+### ===== API S14: escritura (el gateway exige token, la API exige el rol) =====
+### 401 - sin token: lo corta el gateway, no llega a la API
+POST {{gw}}/mascotas
+Content-Type: {{json}}
+
+{ "nombre": "Toby", "especie": "Perro", "raza": "Beagle", "edad": 1, "peso": 9.5, "propietarioId": 2 }
+
+### 403 - token válido pero rol Cliente: lo rechaza la API
+POST {{gw}}/mascotas
+Authorization: Bearer {{tCliente}}
+Content-Type: {{json}}
+
+{ "nombre": "Toby", "especie": "Perro", "raza": "Beagle", "edad": 1, "peso": 9.5, "propietarioId": 2 }
+
+### 201 - Recepcionista crea la mascota
+# @name crearMascota
+POST {{gw}}/mascotas
+Authorization: Bearer {{tRecepcion}}
+Content-Type: {{json}}
+
+{ "nombre": "Toby", "especie": "Perro", "raza": "Beagle", "edad": 1, "peso": 9.5, "propietarioId": 2 }
+
+### 204 - Recepcionista elimina la mascota recién creada
+DELETE {{gw}}/mascotas/{{crearMascota.response.body.$.id}}
+Authorization: Bearer {{tRecepcion}}
+
+### ===== Microservicio 2: Vacunas (el gateway exige token) =====
+### 401 - sin token
+GET {{gw}}/vacunas
+
+### 200 - lista
+GET {{gw}}/vacunas
+Authorization: Bearer {{tCliente}}
+
+### 200 - filtro por especie
+GET {{gw}}/vacunas?especie=Gato
+Authorization: Bearer {{tCliente}}
+
+### 200 - una vacuna
+GET {{gw}}/vacunas/4
+Authorization: Bearer {{tCliente}}
+
+### 404 - vacuna inexistente
+GET {{gw}}/vacunas/99
+Authorization: Bearer {{tCliente}}
+
+### 502 - detén Veterinaria.Vacunas (Ctrl+C en su terminal) y vuelve a llamar
+GET {{gw}}/vacunas
+Authorization: Bearer {{tCliente}}
+
+### ===== Llamada DIRECTA al microservicio 2 (sin gateway) =====
+### 401 - el microservicio también valida el token
+GET http://localhost:5151/api/vacunas

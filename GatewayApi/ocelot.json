@@ -2,106 +2,48 @@
   "Routes": [
     {
       "UpstreamPathTemplate": "/gateway/auth/{everything}",
-      "UpstreamHttpMethod": [
-        "POST"
-      ],
+      "UpstreamHttpMethod": [ "POST" ],
       "DownstreamPathTemplate": "/api/auth/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5150
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5150 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/mascotas{everything}",
-      "UpstreamHttpMethod": [
-        "GET"
-      ],
+      "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/mascotas{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5150
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5150 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/mascotas{everything}",
-      "UpstreamHttpMethod": [
-        "POST",
-        "PUT",
-        "DELETE"
-      ],
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
       "DownstreamPathTemplate": "/api/mascotas{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5150
-        }
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKeys": [
-          "Bearer"
-        ]
-      }
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5150 } ],
+      "AuthenticationOptions": { "AuthenticationProviderKeys": [ "Bearer" ] }
     },
     {
       "UpstreamPathTemplate": "/gateway/propietarios{everything}",
-      "UpstreamHttpMethod": [
-        "GET"
-      ],
+      "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/propietarios{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5150
-        }
-      ]
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5150 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/propietarios{everything}",
-      "UpstreamHttpMethod": [
-        "POST",
-        "PUT",
-        "DELETE"
-      ],
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
       "DownstreamPathTemplate": "/api/propietarios{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5150
-        }
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKeys": [
-          "Bearer"
-        ]
-      }
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5150 } ],
+      "AuthenticationOptions": { "AuthenticationProviderKeys": [ "Bearer" ] }
     },
     {
       "UpstreamPathTemplate": "/gateway/vacunas{everything}",
-      "UpstreamHttpMethod": [
-        "GET"
-      ],
+      "UpstreamHttpMethod": [ "GET" ],
       "DownstreamPathTemplate": "/api/vacunas{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5151
-        }
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKeys": [
-          "Bearer"
-        ]
-      }
+      "DownstreamHostAndPorts": [ { "Host": "localhost", "Port": 5151 } ],
+      "AuthenticationOptions": { "AuthenticationProviderKeys": [ "Bearer" ] }
     }
   ],
   "GlobalConfiguration": {
